@@ -52,7 +52,12 @@ void MemManage_Handler(void);
 void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void DebugMon_Handler(void);
-void TIM6_DAC_IRQHandler(void);
+void SysTick_Handler(void);
+void EXTI0_IRQHandler(void);
+void EXTI1_IRQHandler(void);
+void EXTI4_IRQHandler(void);
+void TIM1_UP_TIM16_IRQHandler(void);
+void TIM1_TRG_COM_TIM17_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
