@@ -22,6 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "MultiFunctionShield.h"
 
 /* USER CODE END Includes */
 
@@ -64,8 +65,12 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_TIM16_Init(void);
 void StartDefaultTask(void *argument);
+void D3_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
+
+/*************  Task-Creation-Part-A ******************/
+/******** put any addtional task declarations in here ***********/
 
 /* USER CODE END PFP */
 
@@ -81,7 +86,6 @@ void StartDefaultTask(void *argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -106,6 +110,8 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+   MultiFunctionShield_Clear();
+   Clear_LEDs();
 
   /* USER CODE END 2 */
 
@@ -131,8 +137,15 @@ int main(void)
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  osThreadNew(D3_Task, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+  /*
+   *************  Task-Creation-Part-C *****************
+   *
+   * Here's where the task ("thread")  gets put into the scheduler Queue
+   */
+
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
@@ -151,6 +164,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
@@ -321,8 +335,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_D1_Pin|LED_D2_Pin|LED_D3_Pin|SevenSeg_CLK_Pin
-                          |SevenSeg_DATA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_D1_Pin|LED_D2_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, LED_D3_Pin|SevenSeg_CLK_Pin|SevenSeg_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SevenSeg_LATCH_Pin|LED_D4_Pin, GPIO_PIN_RESET);
@@ -351,14 +367,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_D1_Pin LED_D2_Pin LED_D3_Pin SevenSeg_CLK_Pin
-                           SevenSeg_DATA_Pin */
-  GPIO_InitStruct.Pin = LED_D1_Pin|LED_D2_Pin|LED_D3_Pin|SevenSeg_CLK_Pin
-                          |SevenSeg_DATA_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  /*Configure GPIO pins : LED_D1_Pin LED_D2_Pin */
+  GPIO_InitStruct.Pin = LED_D1_Pin|LED_D2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED_D3_Pin */
+  GPIO_InitStruct.Pin = LED_D3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_D3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Button_3_Pin */
   GPIO_InitStruct.Pin = Button_3_Pin;
@@ -366,12 +387,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Button_3_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SevenSeg_LATCH_Pin LED_D4_Pin */
-  GPIO_InitStruct.Pin = SevenSeg_LATCH_Pin|LED_D4_Pin;
+  /*Configure GPIO pins : SevenSeg_CLK_Pin SevenSeg_DATA_Pin */
+  GPIO_InitStruct.Pin = SevenSeg_CLK_Pin|SevenSeg_DATA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SevenSeg_LATCH_Pin */
+  GPIO_InitStruct.Pin = SevenSeg_LATCH_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SevenSeg_LATCH_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED_D4_Pin */
+  GPIO_InitStruct.Pin = LED_D4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_D4_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
@@ -401,18 +436,50 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+
+/************  Task-Creation-Part-B *****************
+ *
+ * Here's where the task callback is defined.  What to do when it's my timeslice!
+*/
   /* Infinite loop */
-  for(;;)
+  for(;;)			// <--- IMPORTANT -- Parallel tasks NEVER exit
   {
-  HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5);
-  HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4_Pin);
-    osDelay(2000);
+  HAL_GPIO_TogglePin(LED_D1_GPIO_Port,LED_D1_Pin);
+  HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
+  osDelay(1000);
   }
   // If we goof, exit gracefully
   osThreadTerminate(NULL);
+}
+
+
+/******************************** STUDENT EDITABLE STARTS HERE ***********************/
+/* Put definition of other tasks here */
+
+
+void D3_Task(void *argument)
+{
+  for(;;)			// <--- IMPORTANT -- Parallel tasks NEVER exit
+  {
+  HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin);
+  osDelay(200);
+  }
+  // If we goof, exit gracefully
+  osThreadTerminate(NULL);
+}
+
+
+
+
+
+
+
+/******************************** STUDENT EDITABLE ENDS HERE ***********************/
+
+
+
 
   /* USER CODE END 5 */
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.
