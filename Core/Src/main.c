@@ -38,6 +38,7 @@
 #define D2_time D1_time * 2
 #define D3_time D2_time * 2
 #define D4_time D3_time * 2
+#define count_time 4000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -357,7 +358,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = LED_D1_Pin|LED_D2_Pin|LED_D3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Button_3_Pin */
@@ -419,15 +420,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 /************  Task-Creation-Part-B *****************/
 void D2_Task(void *argument)
 	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin); osDelay(D2_time); }
+		{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
+		  osDelay(D2_time);
+		}
 	}
 void D3_Task(void *argument)
 	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin); osDelay(D3_time); }
+		{ HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin);
+		  osDelay(D3_time); }
 	}
 void D4_Task(void *argument)
 	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4_Pin); osDelay(D4_time); }
+		{ HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4_Pin);
+		osDelay(D4_time);
+		}
 	}
 void SevenSeg_CountUp_Task(void *argument)
 	{
@@ -437,7 +443,8 @@ void SevenSeg_CountUp_Task(void *argument)
 		MultiFunctionShield_Display (count++);
 		if (count % 10)
 			  osThreadSuspend(defaultTaskHandle);
-		osDelay(1500);
+		//osDelay(count_time);
+		HAL_Delay(count_time);
 		}
 	}
 /******************************** STUDENT EDITABLE ENDS HERE ***********************/
