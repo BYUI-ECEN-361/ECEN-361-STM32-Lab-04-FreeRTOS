@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MultiFunctionShield.h"
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -33,7 +34,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define D1_time 250
+#define D2_time D1_time * 2
+#define D3_time D2_time * 2
+#define D4_time D3_time * 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,7 +46,6 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef htim16;
 TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
@@ -63,14 +66,17 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM17_Init(void);
-static void MX_TIM16_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
 /*************  Task-Creation-Part-A ******************/
 /******** put any addtional task declarations in here ***********/
+void D2_Task(void *argument);
 void D3_Task(void *argument);
+void D4_Task(void *argument);
+void SevenSeg_CountUp_Task(void *argument);
+
 
 /* USER CODE END PFP */
 
@@ -86,6 +92,7 @@ void D3_Task(void *argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  // TaskHandle_t xHandle = NULL;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -108,11 +115,10 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM17_Init();
-  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
    MultiFunctionShield_Clear();
-   Clear_LEDs();
-
+   Clear_LEDs();	// Note that D1 is never quite off because the Nucleo Board Built in LED
+   HAL_TIM_Base_Start_IT(&htim17);  // LED SevenSeg cycle thru them
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -145,12 +151,26 @@ int main(void)
    * Here's where the task ("thread")  gets put into the scheduler Queue
    */
 
-osThreadNew(D3_Task, NULL, &defaultTask_attributes);
+
+	//xTaskCreate(D2_Task,
+				//"D2_Blink",        /* Text name for the task. */
+	            //1000,      /* Stack size in words, not bytes. */
+	            //( void * ) 1,    /* Parameter passed into the task. */
+				//tskIDLE_PRIORITY,/* Priority at which the task is created. */
+	            //&xHandle );
+
+	osThreadNew(D2_Task, "D2 Blink", &defaultTask_attributes);
+	osThreadNew(D3_Task, "D3 Blink", &defaultTask_attributes);
+	osThreadNew(D4_Task, "D4_Blink", &defaultTask_attributes);
+	osThreadNew(SevenSeg_CountUp_Task, "Count Up", &defaultTask_attributes);
+
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
+	MultiFunctionShield_Display (1234);
+
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
@@ -216,38 +236,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief TIM16 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM16_Init(void)
-{
-
-  /* USER CODE BEGIN TIM16_Init 0 */
-
-  /* USER CODE END TIM16_Init 0 */
-
-  /* USER CODE BEGIN TIM16_Init 1 */
-
-  /* USER CODE END TIM16_Init 1 */
-  htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 8000 -1;
-  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 10000;
-  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim16.Init.RepetitionCounter = 0;
-  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM16_Init 2 */
-
-  /* USER CODE END TIM16_Init 2 */
-
 }
 
 /**
@@ -415,6 +403,46 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+// Callback: timer has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+// Check which version of the timer triggered this callback and toggle the right LED
+/** This timer has to be here to cycle thru the 7-Seg LED displays **/
+  if (htim == &htim17 )
+  {
+	  MultiFunctionShield__ISRFunc();
+  }
+}
+
+/******************************** STUDENT EDITABLE STARTS HERE ***********************/
+/* Put definition of other tasks here */
+/************  Task-Creation-Part-B *****************/
+void D2_Task(void *argument)
+	{ while(true)
+		{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin); osDelay(D2_time); }
+	}
+void D3_Task(void *argument)
+	{ while(true)
+		{ HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin); osDelay(D3_time); }
+	}
+void D4_Task(void *argument)
+	{ while(true)
+		{ HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4_Pin); osDelay(D4_time); }
+	}
+void SevenSeg_CountUp_Task(void *argument)
+	{
+	int16_t count =0;
+	while(true)
+		{
+		MultiFunctionShield_Display (count++);
+		if (count % 10)
+			  osThreadSuspend(defaultTaskHandle);
+		osDelay(1500);
+		}
+	}
+/******************************** STUDENT EDITABLE ENDS HERE ***********************/
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -427,41 +455,16 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-
-/************  Task-Creation-Part-B *****************
- *
- * Here's where the task callback is defined.  What to do when it's my timeslice!
+/* This task is created automatically and can't be deleted
 */
-  /* Infinite loop */
-  for(;;)			// <--- IMPORTANT -- Parallel tasks NEVER exit
+/* Infinite loop */
+  for(;;)
   {
   HAL_GPIO_TogglePin(LED_D1_GPIO_Port,LED_D1_Pin);
-  osDelay(1000);
+  osDelay(D1_time);
   }
   // If we goof, exit gracefully
   osThreadTerminate(NULL);
-}
-
-
-/******************************** STUDENT EDITABLE STARTS HERE ***********************/
-/* Put definition of other tasks here */
-
-
-void D3_Task(void *argument)
-{
-  for(;;)			// <--- IMPORTANT -- Parallel tasks NEVER exit
-  {
-  HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin);
-  osDelay(200);
-  }
-  // If we goof, exit gracefully
-  osThreadTerminate(NULL);
-
-/******************************** STUDENT EDITABLE ENDS HERE ***********************/
-
-
-
-
   /* USER CODE END 5 */
 }
 
