@@ -13,6 +13,19 @@
   * in the root directory of this software component.
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
+  * *
+  ******************************************************************************
+  * @copyright	BYU-Idaho
+  * @date		2023
+  * @version	F23
+  * @note		For course ECEN-361
+  * @author		Lynn Watson
+  ******************************************************************************
+  *
+  * Student should only modify code between
+  ************** STUDENT EDITABLE HERE STARTS HERE *****
+  ************** STUDENT EDITABLE HERE ENDS HERE *******
+  *
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -73,10 +86,16 @@ void StartDefaultTask(void *argument);
 
 /*************  Task-Creation-Part-A ******************/
 /******** put any addtional task declarations in here ***********/
-void D2_Task(void *argument);
-void D3_Task(void *argument);
-void D4_Task(void *argument);
-void SevenSeg_CountUp_Task(void *argument);
+void D2_Task(void *argument);		// This is the default task working at the beginning of the lab
+
+
+/************** STUDENT EDITABLE HERE STARTS HERE *****
+ *    You'll want to make your own private function prototypes for the other tasks you're adding:
+ *    D3 blink task
+ *    D4 blink task
+ *    7-segment counting task
+ ************** STUDENT EDITABLE HERE ENDS HERE *******
+ */
 
 
 /* USER CODE END PFP */
@@ -117,9 +136,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-   MultiFunctionShield_Clear();
-   Clear_LEDs();	// Note that D1 is never quite off because the Nucleo Board Built in LED
-   HAL_TIM_Base_Start_IT(&htim17);  // LED SevenSeg cycle thru them
+  MultiFunctionShield_Clear();
+  Clear_LEDs();	// Note that D1 is never quite off because the Nucleo Board Built in LED
+  HAL_TIM_Base_Start_IT(&htim17);  // LED SevenSeg cycle thru them
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -160,17 +179,26 @@ int main(void)
 				//tskIDLE_PRIORITY,/* Priority at which the task is created. */
 	            //&xHandle );
 
-	osThreadNew(D2_Task, "D2 Blink", &defaultTask_attributes);
-	osThreadNew(D3_Task, "D3 Blink", &defaultTask_attributes);
-	osThreadNew(D4_Task, "D4_Blink", &defaultTask_attributes);
-	osThreadNew(SevenSeg_CountUp_Task, "Count Up", &defaultTask_attributes);
+	osThreadNew(D2_Task, "D2 Blink", &defaultTask_attributes);	// This launches the
+	/*
+	 *
+     ************** STUDENT EDITABLE HERE STARTS HERE *****
+     ************  Task-Creation-Part-C *****************
+     ************  Here's where the task gets launched into the OS queue of tasks
+     ************  See the above one for the D2_Task
+
+
+
+	 ************** STUDENT EDITABLE HERE ENDS HERE *******
+	 */
+
 
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
-	MultiFunctionShield_Display (1234);
+	MultiFunctionShield_Display (4444);  // Lab-04 -- show all 4444's to start
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -324,8 +352,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_D1_Pin|LED_D2_Pin|LED_D3_Pin|SevenSeg_CLK_Pin
-                          |SevenSeg_DATA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_D1_GPIO_Port, LED_D1_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, LED_D2_Pin|LED_D3_Pin|SevenSeg_CLK_Pin|SevenSeg_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SevenSeg_LATCH_Pin|LED_D4_Pin, GPIO_PIN_RESET);
@@ -354,11 +384,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_D1_Pin LED_D2_Pin LED_D3_Pin */
-  GPIO_InitStruct.Pin = LED_D1_Pin|LED_D2_Pin|LED_D3_Pin;
+  /*Configure GPIO pin : LED_D1_Pin */
+  GPIO_InitStruct.Pin = LED_D1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(LED_D1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED_D2_Pin LED_D3_Pin */
+  GPIO_InitStruct.Pin = LED_D2_Pin|LED_D3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Button_3_Pin */
@@ -415,39 +452,32 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 }
 
-/******************************** STUDENT EDITABLE STARTS HERE ***********************/
-/* Put definition of other tasks here */
-/************  Task-Creation-Part-B *****************/
-void D2_Task(void *argument)
-	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
-		  osDelay(D2_time);
+
+
+
+
+
+
+
+	/*
+     ************  Task-Creation-Part-B *****************
+    */
+	void D2_Task(void *argument)
+		{ while(true)
+			{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
+			  osDelay(D2_time);
+			}
 		}
-	}
-void D3_Task(void *argument)
-	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D3_GPIO_Port,LED_D3_Pin);
-		  osDelay(D3_time); }
-	}
-void D4_Task(void *argument)
-	{ while(true)
-		{ HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4_Pin);
-		osDelay(D4_time);
-		}
-	}
-void SevenSeg_CountUp_Task(void *argument)
-	{
-	int16_t count =0;
-	while(true)
-		{
-		MultiFunctionShield_Display (count++);
-		if (count % 10)
-			  osThreadSuspend(defaultTaskHandle);
-		//osDelay(count_time);
-		HAL_Delay(count_time);
-		}
-	}
-/******************************** STUDENT EDITABLE ENDS HERE ***********************/
+
+	/************** STUDENT EDITABLE HERE STARTS HERE *****
+     ************
+     ************  Here's where the definition of the task (the 'callback') gets made
+     ************  See the above one for the D2_Task
+     Put definition of other tasks here
+
+
+	 ************** STUDENT EDITABLE HERE ENDS HERE *******
+	 */
 
 
 /* USER CODE END 4 */
@@ -467,7 +497,7 @@ void StartDefaultTask(void *argument)
 /* Infinite loop */
   for(;;)
   {
-  HAL_GPIO_TogglePin(LED_D1_GPIO_Port,LED_D1_Pin);
+  HAL_GPIO_WritePin(LED_D1_GPIO_Port,LED_D1_Pin,1); //Active low on the multiboard
   osDelay(D1_time);
   }
   // If we goof, exit gracefully
