@@ -470,15 +470,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 		}
 
-	/************** STUDENT EDITABLE HERE STARTS HERE *****
+    /************** STUDENT EDITABLE HERE STARTS HERE *****
      ************
      ************  Here's where the definition of the task (the 'callback') gets made
      ************  See the above one for the D2_Task
      Put definition of other tasks here
 
 
-	 ************** STUDENT EDITABLE HERE ENDS HERE *******
-	 */
+     ************** STUDENT EDITABLE HERE ENDS HERE *******
+     */
 
 
 /* USER CODE END 4 */
