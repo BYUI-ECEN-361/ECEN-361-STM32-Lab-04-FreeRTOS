@@ -13,6 +13,19 @@
   * in the root directory of this software component.
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
+  * *
+  ******************************************************************************
+  * @copyright	BYU-Idaho
+  * @date		2023
+  * @version	F23
+  * @note		For course ECEN-361
+  * @author		Lynn Watson
+  ******************************************************************************
+  *
+  * Student should only modify code between
+  ************** STUDENT EDITABLE HERE STARTS HERE *****
+  ************** STUDENT EDITABLE HERE ENDS HERE *******
+  *
   ******************************************************************************
   */
 /* USER CODE END Header */
