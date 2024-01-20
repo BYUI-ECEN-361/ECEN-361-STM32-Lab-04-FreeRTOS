@@ -1,5 +1,7 @@
 # ECEN-361 Lab-04:FreeRTOS & Multi-tasking
 
+     Student Name:  Fill-in HERE
+
 ## Introduction and Objective of the Lab
 
 In Lab-02, we saw how individual counter blocks could initiate tasks and work like a multi-tasking system. Each timer block would produce an interrupt, launch the task, then re-start its count. In “parallel” we had
