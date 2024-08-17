@@ -92,7 +92,7 @@ Note that the “StartDefaultTask “ is required when the system is built. That
 
 Now add one final task that display a counter on the Seven-Segment LED display. Count up from 0, and increment the count once per 1500 mS.
 
-## Extra Credit Ideas (5 pts maximum)
+## Ideas for Credit to get to 'A' & Extra-Credit (2 pts for any)
 
 * Stop one of the LED processes when the digit count gets to 20. Explain how you did it. Did you use a global variable? Or read about and use the oSSuspend task API?
   
