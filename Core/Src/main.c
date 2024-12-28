@@ -112,6 +112,7 @@ void D2_Task(void *argument);		// This is the default task working at the beginn
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
   // TaskHandle_t xHandle = NULL;
   /* USER CODE END 1 */
@@ -167,7 +168,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /*
-   *************  Task-Creation-Part-C *****************
+   *************  Task-Creation-Part-B *****************
    *
    * Here's where the task ("thread")  gets put into the scheduler Queue
    */
@@ -207,6 +208,7 @@ int main(void)
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -460,25 +462,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 
 
-	/*
-     ************  Task-Creation-Part-B *****************
-    */
-	void D2_Task(void *argument)
-		{ while(true)
-			{ HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
-			  osDelay(D2_time);
-			}
-		}
+/*
+    ************  Task-Creation-Part-B *****************
+*/
+void D2_Task(void *argument)
+    { while(true)
+        { HAL_GPIO_TogglePin(LED_D2_GPIO_Port,LED_D2_Pin);
+            osDelay(D2_time);
+        }
+    }
 
-    /************** STUDENT EDITABLE HERE STARTS HERE *****
-     ************
-     ************  Here's where the definition of the task (the 'callback') gets made
-     ************  See the above one for the D2_Task
-     Put definition of other tasks here
+/************** STUDENT EDITABLE HERE STARTS HERE *****
+    ************
+    ************  Here's where the definition of the task (the 'callback') gets made
+    ************  See the above one for the D2_Task
+    Put definition of other tasks here
 
 
-     ************** STUDENT EDITABLE HERE ENDS HERE *******
-     */
+    ************** STUDENT EDITABLE HERE ENDS HERE *******
+*/
 
 
 /* USER CODE END 4 */

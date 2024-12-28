@@ -20,7 +20,7 @@ Our next step is to implement a true, commercial-grade RTOS, which gives us all 
 
 FreeRTOS will be the RTOS of choice for this class. The benefits and reasons for this system are reviewed in class, and it is supported directly with the STM32CubeIDE that we use. This lab will be the first use of FreeRTOS in our labs and has the following objectives:
 
-* **Part 1:** Introduction of FreeRTOS with a process-based ‘blinky’ project.
+* **Part 1:** Introduction of FreeRTOS with a process-based 'blinky' project.
 
 * **Part 2:** Creation of tasks to do the same things we did in Lab-02, but with processes controlled by FreeRTOS instead of setting-up and controlling all the timers.
 
@@ -30,7 +30,7 @@ For each of the parts, follow the instructions, then fill in answers to the ques
 
 ### Part 1.1: Starting with the YT-based, add the MultiBoard into the project
 
-Before the lab, you should’ve followed the instructions for the Pre-lab-4 Exam, and built a ‘blinky’ that runs from FreeRTOS.
+Before the lab, you should have followed the instructions for the Pre-lab-4 Exam, and built a 'blinky' that runs from FreeRTOS.
 
 With that project working, power-down the Nucleo, add on the multi-function shield, and start your FreeRTOS blinky again.
 
@@ -66,9 +66,9 @@ Run the project and observe that the D2_LED blinks at 1 Hz (once per second).
 
 There is no seven-segment display.
 
-#### Task: Create 3 more blinking events with tasks (no interrupts or timer blocks this time) (3 pts)
+#### Task: Create 2 more blinking events with tasks (no interrupts or timer blocks this time) (3 pts)
 
-Note that to add a new task in FreeRTOS, three things have to be coded. These are labelled with comments in “main.c” as “Task-Part-A,” “Task-Part-B,” and “Task-Part-C”. As they are discussed below – find these comments in the code for reference.
+Note that to add a new task in FreeRTOS, three things have to be coded. These are labelled with comments in “main.c” as “Task-Part-A,” “Task-Part-B,” and “Task-Part-C”. As they are discussed below - find these comments in the code for reference.
 
 1. `/******* Task-Creation-Part-A *********/`
    
