@@ -52,6 +52,10 @@ Finally, locate the process in the code where the on-board light is toggled. Loo
 
 With the MultiFunction Board in place, change that line to toggle the LED D4 instead:
 
+* Explore the differences between the two “delay” calls: HAL_Delay and OsDelay
+  
+  * [*answer here*]
+
 **HAL_GPIO_TogglePin(LED_D4_GPIO_Port,LED_D4);**
 
 ### Part 2.1: Using the Multi-Board and Launching other FreeRTOS tasks
@@ -99,10 +103,6 @@ Now add one final task that display a counter on the Seven-Segment LED display. 
 ## Ideas for Credit to get to 'A' & Extra-Credit (2 pts for any)
 
 * Stop one of the LED processes when the digit count gets to 20. Explain how you did it. Did you use a global variable? Or read about and use the oSSuspend task API?
-  
-  * [*answer here*]
-
-* Explore the differences between the two “delay” calls: HAL_Delay and OsDelay
   
   * [*answer here*]
 
