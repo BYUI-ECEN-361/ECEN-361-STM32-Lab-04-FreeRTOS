@@ -68,6 +68,10 @@ There is no seven-segment display.
 
 #### Task: Create 2 more blinking events with tasks (no interrupts or timer blocks this time) (3 pts)
 
+New Task Handles and attributes can be added through the STM32 .ioc GUI:
+
+![](media/Add_task.png)
+
 Note that to add a new task in FreeRTOS, three things have to be coded. These are labelled with comments in “main.c” as “Task-Part-A,” “Task-Part-B,” and “Task-Part-C”. As they are discussed below - find these comments in the code for reference.
 
 1. `/******* Task-Creation-Part-A *********/`
